@@ -70,7 +70,7 @@ def get_info(request):
         else:
             re['info'] = target_user.get_dict(restricted=True)
         re['Code'] = 'OK'
-        return HttpResponse(json.dumps(re))
+        return HttpResponse(json.dumps(re,ensure_ascii=False))
     except(KeyError, user.DoesNotExist):
         re['ErrorMessage'] = 'No Such User'
         return HttpResponse(json.dumps(re))

@@ -36,11 +36,11 @@ class user(models.Model):
         ]
         return roles[self.status]
 
-    def get_dict(self,restricted = False):
+    def get_dict(self, restricted=False):
         re = model_to_dict(self).copy()
         re['role'] = self.role()
         # print(re)
-        if  restricted is True:
+        if restricted is True:
             re.pop('city')
             re.pop('province')
             re.pop('country')
@@ -48,6 +48,11 @@ class user(models.Model):
 
         return re
 
+    def can_join_queue(self):
+        if self.role() != 'tourist':
+            return True
+        else:
+            return False
 
 
 class queue(models.Model):
@@ -72,11 +77,17 @@ class queue(models.Model):
         re['status'] = self.get_status()
         return re
 
+    def was_operating(self):
+        if self.get_dict() == 'operating':
+            return True
+        else:
+            return False
+
 
 class relation(models.Model):
     id = models.AutoField(primary_key=True)
 
-    queue = models.ForeignKey(queue,on_delete=models.CASCADE,null=True)
+    queue = models.ForeignKey(queue, on_delete=models.CASCADE, null=True)
 
     user = models.ForeignKey(user, on_delete=models.CASCADE, null=True)
 
@@ -85,7 +96,7 @@ class relation(models.Model):
     create_time = models.DateTimeField(default=timezone.now())
 
     def which(self):
-        roles =[
+        roles = [
             'not related',
             'creator',
             'follower',
@@ -93,7 +104,6 @@ class relation(models.Model):
         ]
         return roles[self.status]
 
-
-
-
-
+    def get_dict(self):
+        re = model_to_dict(self)
+        return re
