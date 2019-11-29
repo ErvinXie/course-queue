@@ -1,14 +1,62 @@
 <!--index.wxml-->
 <view class="container">
-  <view class="userinfo">
-    <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
-    <block wx:else>
-      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
-      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
-    </block>
-  </view>
+  <block wx:if="{{loading_page}}">
+    <loading>
+      加载中...
+    </loading>
+  </block>
+  <block wx:else>
 
-  <view class="usermotto">
-    <text class="user-motto">{{motto}}</text>
-  </view>
+    <view class="userinfo">
+      <block wx:if="{{!hasUserInfo && canIUse}}">
+      </block>
+      <block wx:else>
+        <view class="padding">
+          <view class="cu-avatar xl round" style="background-image:url({{userInfo.avatarUrl}});">
+            <view class="cu-tag badge {{userInfo.gender==0?'cuIcon-female bg-pink':(userInfo.gender==1?'cuIcon-male bg-blue':'')}}"></view>
+          </view>
+        </view>
+        <!-- <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image> -->
+        <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+      </block>
+
+
+      <block>
+        <form>
+          <view class="cu-form-group margin-top">
+            <view class="title">{{isTeacher?'教师':'学生'}}注册</view>
+            <switch class="cyan sm switch-s" checked="{{isTeacher}}" bindchange="switchChange"></switch>
+          </view>
+          <view class="cu-form-group">
+            <view class="title">姓名</view>
+            <input placeholder="必填" bindinput="input_name" value="{{me.name}}"></input>
+          </view>
+          <block wx:if="{{isTeacher}}">
+            <view class="cu-form-group">
+              <view class="title" type="password">密码</view>
+              <input placeholder="必填" bindinput="input_cert"></input>
+            </view>
+          </block>
+          <block wx:else>
+            <view class="cu-form-group">
+              <view class="title">学号</view>
+              <input placeholder="必填" bindinput="input_school_id" value="{{me.school_id}}"></input>
+            </view>
+            <view class="cu-form-group">
+              <view class="title">班号</view>
+              <input placeholder="必填" bindinput="input_class_id" value="{{me.class_id}}"></input>
+            </view>
+          </block>
+
+
+        </form>
+        <view class="padding flex flex-direction">
+          <button open-type="getUserInfo" class="cu-btn bg-cyan margin-tb-sm lg" bindtap="set_info" loading="{{set_info_loading}}">{{set_info_loading?"":(me.role=='tourist'?"注册":"更新")}}</button>
+
+          <button wx:if="{{me.role!='tourist'}}" class="cu-btn bg-yellow margin-tb-sm lg" bindtap="to_queues">所有队列</button>
+        </view>
+
+      </block>
+    </view>
+  </block>
 </view>

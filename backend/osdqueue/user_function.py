@@ -1,8 +1,10 @@
 from django.http import HttpResponse
 from django.utils import timezone
+from .utils import DateEncoder
 from django.views.decorators.csrf import csrf_exempt
-import json
 from osdqueue.models import user, queue, relation
+
+import json
 
 
 @csrf_exempt
@@ -32,21 +34,55 @@ def get_openid(request):
         except(KeyError, user.DoesNotExist):
             this_user = user(open_id=re['open_id '])
             this_user.save()
-        return HttpResponse(json.dumps(re))
+        re['me'] = this_user.get_dict()
+        return HttpResponse(json.dumps(re, cls=DateEncoder, ensure_ascii=False))
 
 
 @csrf_exempt
 def set_info(request):
     open_id = request.POST.get('open_id', None)
+    user_info = request.POST.get('user_info', None)
+    if user_info is not None:
+        user_info = json.loads(user_info)
+        user_info['avatar_url'] = user_info['avatarUrl']
     re = {'Code': 'Error'}
+
     try:
         this_user = user.objects.get(open_id=open_id)
         for key in this_user.get_dict():
-            if key != 'id' and request.POST.get(key, None) is not None:
-                setattr(this_user, key, request.POST.get(key))
+            if key != 'id' and key != 'status':
+                if key in request.POST:
+                    print(key, request.POST.get(key))
+                    setattr(this_user, key, request.POST.get(key))
+                if key in user_info:
+                    print(key, user_info[key])
+                    setattr(this_user, key, user_info[key])
+
+        # decide the identiy
+        # print(this_user.get_dict())
+        if this_user.role() == 'tourist':
+            cert = request.POST.get('cert', None)
+            from .secure_info import cert_code
+            if cert == cert_code and this_user.name != "":
+                this_user.status = 2  # teacher
+
+            else:
+                if this_user.name != "" and this_user.school_id != "" and this_user.class_id != "":
+                    this_user.status = 1  # students
+                else:
+                    re['ErrorMessage'] = 'Empty Information'
+                    return HttpResponse(json.dumps(re, cls=DateEncoder, ensure_ascii=False))
+
+        if this_user.name == '':
+            if this_user.role() != 'admin':
+                this_user.status = 0
+        if this_user.school_id == "" or this_user.class_id == "":
+            if this_user.role() == 'student':
+                this_user.status = 0
         this_user.save()
         re['Code'] = 'OK'
-        return HttpResponse(json.dumps(re))
+        re['me'] = this_user.get_dict()
+        return HttpResponse(json.dumps(re, cls=DateEncoder, ensure_ascii=False))
     except(KeyError, user.DoesNotExist):
         re['ErrorMessage'] = 'Not Signed'
         return HttpResponse(json.dumps(re))
@@ -70,7 +106,7 @@ def get_info(request):
         else:
             re['info'] = target_user.get_dict(restricted=True)
         re['Code'] = 'OK'
-        return HttpResponse(json.dumps(re,ensure_ascii=False))
+        return HttpResponse(json.dumps(re, ensure_ascii=False))
     except(KeyError, user.DoesNotExist):
         re['ErrorMessage'] = 'No Such User'
         return HttpResponse(json.dumps(re))

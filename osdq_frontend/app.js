@@ -1,6 +1,6 @@
 //app.js
 App({
-  onLaunch: function () {
+  onLaunch: function() {
     // 展示本地存储能力
     var logs = wx.getStorageSync('logs') || []
     logs.unshift(Date.now())
@@ -20,13 +20,17 @@ App({
           header: {
             "Content-Type": "application/x-www-form-urlencoded"
           },
-          success: function (res) {
+          success: res=> {
             console.log(res.data)
-            if(res.data.Code=="OK"){
+            if (res.data.Code == "OK") {
               that.globalData.openId = res.data.open_id
+              that.globalData.me = res.data.me
+            }
+            if(that.openIdReadyCallBack){
+              that.openIdReadyCallBack(res)
             }
           },
-          fail: function (res) {
+          fail: res=> {
             console.log(res.data)
           }
         })
@@ -41,11 +45,11 @@ App({
             success: res => {
               // 可以将 res 发送给后台解码出 unionId
               this.globalData.userInfo = res.userInfo
+              console.log('Already Get User Info')
               console.log(res)
               // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
               // 所以此处加入 callback 以防止这种情况
               if (this.userInfoReadyCallback) {
-                console.log('callback')
                 this.userInfoReadyCallback(res)
               }
             }
@@ -57,7 +61,7 @@ App({
   globalData: {
     server: "http://127.0.0.1:8000/",
     userInfo: null,
-    openId:null,
-    
+    openId: null,
+    me:null
   }
 })

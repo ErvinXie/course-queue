@@ -1,0 +1,34 @@
+<view class="cu-bar bg-white solid-bottom justify-between">
+  <view class="action">
+    <text class="cuIcon-title text-cyan "></text> 所有队列
+  </view>
+  <view class="action">
+    <button class="cu-btn bg-cyan shadow" bindtap="showModal" data-target="menuModal">设置</button>
+  </view>
+</view>
+
+
+
+
+<view class="cu-list menu card-menu margin-top">
+  <block wx:for="{{queues}}" wx:for-item="queue">
+    <view class="cu-item {{queue.status=='operating'?'arrow':''}}">
+      
+        <view class="margin-top margin-bottom content">
+          <text class="cuIcon-title text-{{queue.status=='operating'?'yellow':(queue.status=='pending'?'grey':'cyan')}}"></text>
+          <text class="text"> {{queue.name}}</text>
+          <view class="cu-tag round bg-{{queue.status=='operating'?'yellow':(queue.status=='pending'?'grey':'cyan')}}">{{queue.status=='operating'?'正在排队':(queue.status=='pending'?'暂停':'结束')}}</view>
+        </view>
+     
+      <view class="action">
+          <view class="cu-avatar-group">
+            <block wx:for="{{queue.upcoming}}" wx:for-item="ava">
+              <view class="cu-avatar round sm" style="background-image:url({{ava}});"></view>
+            </block>
+          </view>
+          <text class="text-grey text-sm">{{queue.size}}人</text>
+        </view>
+    </view>
+  </block>
+
+</view>

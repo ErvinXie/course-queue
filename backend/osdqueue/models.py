@@ -12,7 +12,9 @@ class user(models.Model):
     # gender 1=male 0=female 2=others
     gender = models.IntegerField(null=True, blank=True)
 
-    school_id = models.CharField(max_length=30, null=True, blank=True)
+    school_id = models.CharField(max_length=20, null=True, blank=True)
+
+    class_id = models.CharField(max_length=20,null=True,blank=True)
 
     city = models.CharField(max_length=20, null=True, blank=True)
 
@@ -39,6 +41,7 @@ class user(models.Model):
     def get_dict(self, restricted=False):
         re = model_to_dict(self).copy()
         re['role'] = self.role()
+        re.pop('status')
         # print(re)
         if restricted is True:
             re.pop('city')
@@ -60,9 +63,11 @@ class queue(models.Model):
 
     name = models.CharField(max_length=1024, null=True, blank=True)
 
-    create_time = models.DateTimeField(default=timezone.now())
+    create_time = models.DateTimeField(default=timezone.now)
 
     status = models.IntegerField(default=0)
+
+    creator = models.ForeignKey(user,on_delete=models.CASCADE,null=True)
 
     def get_status(self):
         states = [
@@ -78,7 +83,7 @@ class queue(models.Model):
         return re
 
     def was_operating(self):
-        if self.get_dict() == 'operating':
+        if self.get_status() == 'operating':
             return True
         else:
             return False
@@ -93,7 +98,7 @@ class relation(models.Model):
 
     status = models.IntegerField(default=0)
 
-    create_time = models.DateTimeField(default=timezone.now())
+    create_time = models.DateTimeField(default=timezone.now)
 
     def which(self):
         roles = [

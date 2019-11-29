@@ -15,15 +15,14 @@ def create_queue(request):
         if creator.role() != 'teacher' and creator.role() != 'admin':
             re['ErrorMessage'] = 'Not Authorized'
         else:
-            new_queue = queue()
+            new_queue = queue(creator=creator)
             new_queue.save()
             name = request.POST.get('name', None)
             if name is None:
                 name = '队列【' + str(new_queue.id) + '】'
             new_queue.name = name
             new_queue.save()
-            new_relation = relation(user=creator, queue=new_queue)
-            new_relation.save()
+
             re['Code'] = 'OK'
         return HttpResponse(json.dumps(re))
     except(KeyError, user.DoesNotExist):
@@ -48,12 +47,7 @@ def set_queue(request):
         re['ErrorMessage'] = 'No Such Queue'
         return HttpResponse(json.dumps(re))
 
-    try:
-        r = relation.objects.get(user=request_user, queue=target_queue)
-        if r.which() != 'creator' and request_user.role() != 'admin':
-            re['ErrorMessage'] = 'Not Authorized'
-            return HttpResponse(json.dumps(re))
-    except(KeyError, relation.objects):
+    if target_queue.creator != request_user and request_user.role() != 'admin':
         re['ErrorMessage'] = 'Not Authorized'
         return HttpResponse(json.dumps(re))
 
@@ -67,6 +61,7 @@ def set_queue(request):
     if op == 'start':
         target_queue.status = 2
 
+    target_queue.save()
     re['Code'] = 'OK'
     return HttpResponse(json.dumps(re))
 
@@ -99,7 +94,7 @@ def tackle_queue(request):
         if target_queue.was_operating() is False:
             re['ErrorMessage'] = 'Queue Not Available'
             return HttpResponse(json.dumps(re))
-        if r.which() != 'creator':
+        if target_queue.creator != request_user:
             re['ErrorMessage'] = 'Not Authorized'
             return HttpResponse(json.dumps(re))
         try:
@@ -120,6 +115,7 @@ def tackle_queue(request):
             return HttpResponse(json.dumps(re))
     if op == 'join':
         if target_queue.was_operating() is False:
+            print(target_queue.get_dict())
             re['ErrorMessage'] = 'Queue Not Available'
             return HttpResponse(json.dumps(re))
         if request_user.can_join_queue() is False:
@@ -132,7 +128,7 @@ def tackle_queue(request):
         re['Code'] = 'OK'
         return HttpResponse(json.dumps(re))
     if op == 'quit':
-        if r.which() == 'finished' or r.which() == 'creator':
+        if r.which() == 'finished':
             re['ErrorMessage'] = 'You cannot quit this queue'
             return HttpResponse(json.dumps(re))
         r.status = 0
@@ -173,10 +169,8 @@ def get_queue(request):
         rs = relation.objects.filter(queue=target_queue, status__gt=0).order_by('status', 'create_time')
         re['follower'] = []
         re['finished'] = []
+        re['creator'] = target_queue.creator.get_dict(restricted=True)
         for r in rs:
-            print(r.get_dict())
-            if r.which() == 'creator':
-                re['creator'] = r.user.get_dict(restricted=True)
             if r.which() == 'follower':
                 re['follower'].append(r.user.get_dict(restricted=True))
             if r.which() == 'finished':
@@ -202,5 +196,12 @@ def all_queue(request):
     queues = queue.objects.all()
     re['queues'] = []
     for q in queues:
-        re['queues'].append(q.get_dict())
+        tmp = q.get_dict()
+        all = relation.objects.filter(queue=q)
+        r = all.filter(status=2).order_by('create_time')
+        tmp['creator'] = q.creator.avatar_url
+        tmp['size'] = len(r)
+        tmp['upcoming'] = [u.user.avatar_url for u in r[:3]]
+        re['queues'].append(tmp)
+    re['Code'] = 'OK'
     return HttpResponse(json.dumps(re, cls=DateEncoder, ensure_ascii=False))
