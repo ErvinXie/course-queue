@@ -54,6 +54,8 @@ def set_queue(request):
     op = request.POST.get('operation', None)
     if op == 'delete':
         target_queue.delete()
+        re['Code']='OK'
+        return HttpResponse(json.dumps(re))
     if op == 'pend':
         target_queue.status = 0
     if op == 'finish':

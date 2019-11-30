@@ -54,7 +54,7 @@ Page({
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function() {
-    this.get_queue
+    this.get_queue()
   },
 
   /**
@@ -98,7 +98,9 @@ Page({
       fail: function(res) {
         console.log(res.data)
       },
-      complete: e => {}
+      complete: e => {
+        wx.stopPullDownRefresh()
+      }
     })
   },
   tackle_queue: function(e) {
@@ -149,7 +151,11 @@ Page({
       success: function (res) {
         console.log(res.data)
         if (res.data.Code == "OK") {
-
+          if (e.currentTarget.dataset.op=='delete'){
+            wx.navigateBack({
+              
+            })
+          }
         } else {
           wx.showToast({
             title: res.data.ErrorMessage,
@@ -160,7 +166,8 @@ Page({
       fail: function (res) {
         console.log(res.data)
       },
-      complete: e => {
+      complete: function() {
+        if (e.currentTarget.dataset.op != 'delete') 
         that.get_queue()
       }
     })

@@ -23,7 +23,6 @@
       下一位</button>
     <button class="cu-btn bg-{{queue.status=='operating'?'red':'cyan'}} margin-tb-sm lg" bindtap="set_queue" data-op="{{queue.status=='operating'?'pend':'start'}}">
       {{queue.status=='operating'?'暂停队列':'开始队列'}}</button>
-
   </block>
 </view>
 
@@ -75,5 +74,14 @@
         <text class="text-grey justify-center"> {{follower.school_id?follower.school_id:'暂无学号'}} {{follower.name}}</text>
       </view>
     </view>
+  </block>
+</view>
+
+
+<view class="flex flex-direction">
+  <block wx:if="{{queue.creator.id==me.id}}">
+    <button class="cu-btn bg-red margin-tb-sm lg" bindtap="set_queue" data-op="delete">
+      删除队列
+      </button>
   </block>
 </view>

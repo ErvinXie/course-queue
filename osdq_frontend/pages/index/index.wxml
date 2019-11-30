@@ -47,16 +47,19 @@
               <input placeholder="必填" bindinput="input_class_id" value="{{me.class_id}}"></input>
             </view>
           </block>
-
-
         </form>
         <view class="padding flex flex-direction">
-          <button open-type="getUserInfo" class="cu-btn bg-cyan margin-tb-sm lg" bindtap="set_info" loading="{{set_info_loading}}">{{set_info_loading?"":(me.role=='tourist'?"注册":"更新信息")}}</button>
+          <button open-type="getUserInfo" class="cu-btn bg-cyan margin-tb-sm lg" bindtap="set_info" bindgetuserinfo="getUserInfo" loading="{{set_info_loading}}">{{set_info_loading?"":(me.role=='tourist'?"注册":"更新信息")}}</button>
 
           <button wx:if="{{me.role!='tourist'}}" class="cu-btn bg-yellow margin-tb-sm lg" bindtap="to_queues">所有队列</button>
         </view>
-
       </block>
     </view>
   </block>
+</view>
+
+<view class="flex-sub text-center">
+  <view class="solid-bottom text-sm padding">
+    <text class="text-grey">Ervin Presents</text>
+  </view>
 </view>

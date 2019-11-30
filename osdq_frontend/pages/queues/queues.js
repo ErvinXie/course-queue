@@ -96,7 +96,9 @@ Page({
       fail: function(res) {
         console.log(res.data)
       },
-      complete: e => {}
+      complete: e => {
+        wx.stopPullDownRefresh()
+      }
     })
   },
   queue_detail: function(e) {
