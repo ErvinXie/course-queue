@@ -18,7 +18,7 @@ def create_queue(request):
             new_queue = queue(creator=creator)
             new_queue.save()
             name = request.POST.get('name', None)
-            if name is None:
+            if name is "":
                 name = '队列【' + str(new_queue.id) + '】'
             new_queue.name = name
             new_queue.save()
@@ -159,23 +159,22 @@ def get_queue(request):
 
     try:
         r = relation.objects.get(user=request_user, queue=target_queue)
-    except(KeyError, relation.objects):
+    except(KeyError, relation.DoesNotExist):
         r = relation(user=request_user, queue=target_queue)
         r.save()
 
     re['queue'] = target_queue.get_dict()
-
     try:
         rs = relation.objects.filter(queue=target_queue, status__gt=0).order_by('status', 'create_time')
-        re['follower'] = []
-        re['finished'] = []
-        re['creator'] = target_queue.creator.get_dict(restricted=True)
+        re['queue']['follower'] = []
+        re['queue']['finished'] = []
+        re['queue']['creator'] = target_queue.creator.get_dict(restricted=True)
         for r in rs:
             if r.which() == 'follower':
-                re['follower'].append(r.user.get_dict(restricted=True))
+                re['queue']['follower'].append(r.user.get_dict(restricted=True))
             if r.which() == 'finished':
-                re['finished'].append(r.user.get_dict(restricted=True))
-        re['my_relation'] = r.get_dict()
+                re['queue']['finished'].append(r.user.get_dict(restricted=True))
+        re['queue']['my_relation'] = r.get_dict()
 
         re['Code'] = 'OK'
         return HttpResponse(json.dumps(re, cls=DateEncoder, ensure_ascii=False))

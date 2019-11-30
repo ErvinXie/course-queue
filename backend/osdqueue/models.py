@@ -111,4 +111,5 @@ class relation(models.Model):
 
     def get_dict(self):
         re = model_to_dict(self)
+        re['which'] = self.which()
         return re

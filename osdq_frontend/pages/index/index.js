@@ -4,7 +4,7 @@ const app = getApp()
 
 Page({
   data: {
-    loading_page:false,
+    loading_page: false,
     userInfo: {},
     hasUserInfo: false,
     canIUse: wx.canIUse('button.open-type.getUserInfo'),
@@ -20,11 +20,13 @@ Page({
     })
   },
   onLoad: function() {
+    var that = this
     if (app.globalData.userInfo) {
       this.setData({
         userInfo: app.globalData.userInfo,
         hasUserInfo: true
       })
+      that.to_queues()
     } else if (this.data.canIUse) {
       // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
       // 所以此处加入 callback 以防止这种情况
@@ -33,6 +35,7 @@ Page({
           userInfo: res.userInfo,
           hasUserInfo: true
         })
+        that.to_queues()
       }
     } else {
       // 在没有 open-type=getUserInfo 版本的兼容处理
@@ -43,6 +46,7 @@ Page({
             userInfo: res.userInfo,
             hasUserInfo: true
           })
+          that.to_queues()
         }
       })
     }
@@ -53,10 +57,8 @@ Page({
         me: app.globalData.me,
         meOk: true
       })
-      
-      if (this.data.me.role != 'tourist') {
-        this.to_queues()
-      }
+
+      that.to_queues()
       this.setData({
         loading_page: false
       })
@@ -66,16 +68,14 @@ Page({
           me: res.data.me,
           meOk: true
         })
-        if(this.data.me.role != 'tourist'){
-          this.to_queues()
-        }
+        that.to_queues()
         this.setData({
           loading_page: false
         })
       }
     }
   },
-  
+
   getUserInfo: function(e) {
     console.log(e)
     app.globalData.userInfo = e.detail.userInfo
@@ -132,6 +132,7 @@ Page({
               me: res.data.me
             })
             app.globalData.me = res.data.me
+            that.to_queues()
             wx.showToast({
               title: '操作成功',
               icon: 'none'
@@ -185,15 +186,17 @@ Page({
     })
   },
   to_queues: function(e) {
-    if (this.data.hasUserInfo && this.data.meOk) {
-      wx.redirectTo({
+    if (this.data.hasUserInfo && this.data.meOk && this.data.me.role != 'tourist') {
+      wx.navigateTo({
         url: '../queues/queues',
       })
     } else {
-      wx.showToast({
-        title: '还没有准备好',
-        icon: 'none'
-      })
+      if (e) {
+        wx.showToast({
+          title: '还没有准备好',
+          icon: 'none'
+        })
+      }
     }
   }
 })

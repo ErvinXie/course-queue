@@ -1,7 +1,8 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/queues/queues"
+    "pages/queues/queues",
+    "pages/queue_detail/queue_detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

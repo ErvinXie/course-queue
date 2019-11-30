@@ -1,0 +1,79 @@
+<view class="cu-bar bg-white solid-bottom justify-between">
+  <view class="action">
+    <text class="cuIcon-title text-{{queue.status=='operating'?'yellow':(queue.status=='pending'?'grey':'cyan')}} "></text> {{queue.name?queue.name:'暂无名称'}}
+  </view>
+</view>
+<view class="cu-bar bg-white solid-bottom justify-between">
+  <view class="action">
+    <text class="cuIcon-title text-{{queue.status=='operating'?'yellow':(queue.status=='pending'?'grey':'cyan')}} "></text>
+    <view class="cu-avatar round" style="background-image:url({{queue.creator.avatar_url}});">
+      <view class="cu-tag badge {{queue.creator.gender==0?'cuIcon-female bg-pink':(queue.creator.gender==1?'cuIcon-male bg-blue':'')}}">
+      </view>
+    </view>创建者: {{queue.creator.name}}
+
+  </view>
+</view>
+
+<view class="flex flex-direction">
+  <button wx:if="{{queue.status=='operating'}}" class="cu-btn bg-{{['yellow','yellow','red','cyan'][queue.my_relation.status]}} margin-tb-sm lg" bindtap="tackle_queue" data-op="{{['join','next','quit','join'][queue.my_relation.status]}}">
+    {{['加入队列','下一位','退出队列','重新排队'][queue.my_relation.status]}}</button>
+
+  <block wx:if="{{queue.creator.id==me.id}}">
+    <button wx:if="{{queue.status=='operating'}}" class="cu-btn bg-yellow}} margin-tb-sm lg" bindtap="tackle_queue" data-op="next">
+      下一位</button>
+    <button class="cu-btn bg-{{queue.status=='operating'?'red':'cyan'}} margin-tb-sm lg" bindtap="set_queue" data-op="{{queue.status=='operating'?'pend':'start'}}">
+      {{queue.status=='operating'?'暂停队列':'开始队列'}}</button>
+
+  </block>
+</view>
+
+
+<view class="cu-bar bg-white solid-bottom justify-between">
+  <view class="action">
+    <text class="cuIcon-title text-{{queue.status=='operating'?'yellow':(queue.status=='pending'?'grey':'cyan')}} "></text> 队列中 【{{queue.follower.length}}】人
+  </view>
+</view>
+<view class="cu-list menu card-menu margin-top">
+  <block wx:for="{{queue.follower}}" wx:for-item="follower">
+    <view class="cu-item ">
+      <view class="content justify-center">
+        <text class="cuIcon-title text-{{queue.status=='operating'?'yellow':(queue.status=='pending'?'grey':'cyan')}}"></text>
+
+        <text class="text-grey justify-center">【{{index+1}}】</text>
+        <view class="cu-avatar round" style="background-image:url({{follower.avatar_url}});">
+          <view class="cu-tag badge {{follower.gender==0?'cuIcon-female bg-pink':(follower.gender==1?'cuIcon-male bg-blue':'')}}">
+          </view>
+        </view>
+        <text class="text-grey justify-center"> {{follower.school_id?follower.school_id:'暂无学号'}} {{follower.name}}</text>
+      </view>
+    </view>
+  </block>
+</view>
+
+<!-- <view class="flex flex-direction" wx:if="{{queue.creator.id==me.id&&queue.status=='operating'}}">
+  <button class="cu-btn bg-red margin-tb-sm lg" bindtap="set_queue" data-op="finish">
+    结束队列</button>
+</view> -->
+
+
+<view class="cu-bar bg-white solid-bottom justify-between margin-top">
+  <view class="action">
+    <text class="cuIcon-title text-{{queue.status=='operating'?'yellow':(queue.status=='pending'?'grey':'cyan')}} "></text> 已完成 【{{queue.finished.length}}】人
+  </view>
+</view>
+<view class="cu-list menu card-menu margin-top">
+  <block wx:for="{{queue.finished}}" wx:for-item="follower">
+    <view class="cu-item ">
+      <view class="content justify-center">
+        <text class="cuIcon-title text-{{queue.status=='operating'?'yellow':(queue.status=='pending'?'grey':'cyan')}}"></text>
+
+        <text class="text-grey justify-center">【{{index+1}}】</text>
+        <view class="cu-avatar round" style="background-image:url({{follower.avatar_url}});">
+          <view class="cu-tag badge {{follower.gender==0?'cuIcon-female bg-pink':(follower.gender==1?'cuIcon-male bg-blue':'')}}">
+          </view>
+        </view>
+        <text class="text-grey justify-center"> {{follower.school_id?follower.school_id:'暂无学号'}} {{follower.name}}</text>
+      </view>
+    </view>
+  </block>
+</view>

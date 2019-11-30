@@ -59,7 +59,7 @@ App({
     })
   },
   globalData: {
-    server: "http://127.0.0.1:8000/",
+    server: "https://bittvcs.com:8081/",
     userInfo: null,
     openId: null,
     me:null

@@ -1,4 +1,4 @@
-// pages/queues.js
+// pages/queue_detail/queue_detail.js
 const app = getApp()
 Page({
 
@@ -6,18 +6,20 @@ Page({
    * 页面的初始数据
    */
   data: {
-    me: {},
-    queues: [],
-    name: ""
+    queue: {},
+    me: {}
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function(options) {
+    console.log(options.id)
     this.setData({
+      'queue.id': options.id,
       me: app.globalData.me
     })
+    this.get_queue()
   },
 
   /**
@@ -31,7 +33,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function() {
-    this.all_queue()
+
   },
 
   /**
@@ -52,7 +54,7 @@ Page({
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function() {
-    this.all_queue()
+    this.get_queue
   },
 
   /**
@@ -68,14 +70,14 @@ Page({
   onShareAppMessage: function() {
 
   },
-
-  all_queue: function() {
+  get_queue: function() {
     var that = this
     wx.request({
-      url: app.globalData.server + 'osdq/all-queue/', //接口地址  
+      url: app.globalData.server + 'osdq/get-queue/', //接口地址  
       method: "POST",
       data: {
         open_id: that.data.me.open_id,
+        queue_id: that.data.queue.id
       },
       header: {
         "Content-Type": "application/x-www-form-urlencoded"
@@ -84,7 +86,7 @@ Page({
         console.log(res.data)
         if (res.data.Code == "OK") {
           that.setData({
-            queues: res.data.queues
+            queue: res.data.queue
           })
         } else {
           wx.showToast({
@@ -99,27 +101,15 @@ Page({
       complete: e => {}
     })
   },
-  queue_detail: function(e) {
-    console.log(e.currentTarget.dataset.id)
-    var id = e.currentTarget.dataset.id
-
-    wx.navigateTo({
-      url: '../queue_detail/queue_detail?id=' + id,
-    })
-  },
-  input_name: function(e) {
-    this.setData({
-      name: e.detail.value
-    })
-  },
-  create_queue: function() {
+  tackle_queue: function(e) {
     var that = this
     wx.request({
-      url: app.globalData.server + 'osdq/create-queue/', //接口地址  
+      url: app.globalData.server + 'osdq/tackle-queue/', //接口地址  
       method: "POST",
       data: {
         open_id: that.data.me.open_id,
-        name: that.data.name
+        queue_id: that.data.queue.id,
+        operation: e.currentTarget.dataset.op
       },
       header: {
         "Content-Type": "application/x-www-form-urlencoded"
@@ -127,10 +117,7 @@ Page({
       success: function(res) {
         console.log(res.data)
         if (res.data.Code == "OK") {
-          that.all_queue()
-          that.setData({
-            name: ""
-          })
+       
         } else {
           wx.showToast({
             title: res.data.ErrorMessage,
@@ -141,7 +128,41 @@ Page({
       fail: function(res) {
         console.log(res.data)
       },
-      complete: e => {}
+      complete: e => {
+        that.get_queue()
+      }
+    })
+  },
+  set_queue: function (e) {
+    var that = this
+    wx.request({
+      url: app.globalData.server + 'osdq/set-queue/', //接口地址  
+      method: "POST",
+      data: {
+        open_id: that.data.me.open_id,
+        queue_id: that.data.queue.id,
+        operation: e.currentTarget.dataset.op
+      },
+      header: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      success: function (res) {
+        console.log(res.data)
+        if (res.data.Code == "OK") {
+
+        } else {
+          wx.showToast({
+            title: res.data.ErrorMessage,
+            icon: 'none'
+          })
+        }
+      },
+      fail: function (res) {
+        console.log(res.data)
+      },
+      complete: e => {
+        that.get_queue()
+      }
     })
   }
 })
