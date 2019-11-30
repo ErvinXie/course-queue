@@ -171,11 +171,11 @@ def get_queue(request):
         re['queue']['follower'] = []
         re['queue']['finished'] = []
         re['queue']['creator'] = target_queue.creator.get_dict(restricted=True)
-        for r in rs:
-            if r.which() == 'follower':
-                re['queue']['follower'].append(r.user.get_dict(restricted=True))
-            if r.which() == 'finished':
-                re['queue']['finished'].append(r.user.get_dict(restricted=True))
+        for rx in rs:
+            if rx.which() == 'follower':
+                re['queue']['follower'].append(rx.user.get_dict(restricted=True))
+            if rx.which() == 'finished':
+                re['queue']['finished'].append(rx.user.get_dict(restricted=True))
         re['queue']['my_relation'] = r.get_dict()
 
         re['Code'] = 'OK'
@@ -203,6 +203,7 @@ def all_queue(request):
         tmp['creator'] = q.creator.avatar_url
         tmp['size'] = len(r)
         tmp['upcoming'] = [u.user.avatar_url for u in r[:3]]
+        tmp['upcoming'].reverse()
         re['queues'].append(tmp)
     re['Code'] = 'OK'
     return HttpResponse(json.dumps(re, cls=DateEncoder, ensure_ascii=False))
